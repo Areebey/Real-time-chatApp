@@ -37,26 +37,37 @@ const registerUser = asyncHandler( async (req, res) => {
     }
 });
 
-
-const authUser = asyncHandler(async(req, res) => {
-    const {email, password} = req.body
+const authUser = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        res.status(400)
+        throw new Error("Please provide email and password")
+    }
+    const user = await User.findOne({ email });
+    if (user && (await user.matchPassword(password))) {
+        res.json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            pic: user.pic,
+            token: generateToken(user._id)
+        })
+    } else {
+        res.status(401)
+        throw new Error("Invalid email or password")
+    }
 })
 
-const user  = await User.findOne({email})
-if(user){
-    res.json({
-        _id : user._id,
-        email: user.email,
-        password: user.password,
-        pic:  user.pic,
-        token: generateToken(user._id)
+const allUser = asyncHandler(async (req, res) => {
+    const keyword = req.query.search ? {
+        $or:[
+            {name: {$regex: req.query.search, $options: "i"}},
+            {email: {$regex: req.query.search, $options: "i"}},
+        ]
+    } : {};
 
-    })
-}else{
-        res.status(401)
-        throw new Error("Invalid Email and Password")
-    }
+    const users = await User.find(keyword).find({_id:{$ne : req.user._id}});
+    res.send(users);
+})
 
-module.exports = {registerUser}
-
-//16min
+module.exports = {registerUser, authUser, allUser}
