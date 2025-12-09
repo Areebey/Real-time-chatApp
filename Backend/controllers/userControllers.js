@@ -72,5 +72,3 @@ const allUser = asyncHandler(async (req, res) => {
 
 module.exports = {registerUser, authUser, allUser}
 
-
-//15min no 10th
