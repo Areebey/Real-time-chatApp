@@ -53,7 +53,7 @@ const Login = () => {
        setEmail("")
        setPassword("")
        setLoading(false)
-       navigate.push("/chats")
+       navigate("/chats")
     } catch (error) {
       console.error('[Signin] error', error?.response || error);
       toast({
